@@ -1,5 +1,7 @@
+@import "https://use.fontawesome.com/releases/v5.5.0/css/all.css";
 .App {
   text-align: center;
+  background:none;
 }
 
 .App-logo {
@@ -26,6 +28,14 @@
 
 .App-link {
   color: #61dafb;
+}
+body{
+
+  margin: 0;
+  padding: 0;
+ font-family: sans-serif;
+  background: url(https://images.ctfassets.net/hrltx12pl8hq/2TRIFRwcjrTuNprkTQHVxs/088159eb8e811aaac789c24701d7fdb1/LP_image.jpg?fit=fill&w=632&h=354&fm=webp) no-repeat;
+  background-size:cover; 
 }
 
 @keyframes App-logo-spin {

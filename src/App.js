@@ -1,4 +1,4 @@
-import {getAuth,signInWithPopup, GoogleAuthProvider,GithubAuthProvider,signOut,createUserWithEmailAndPassword} from 'firebase/auth';
+import {getAuth,signInWithPopup, GoogleAuthProvider,GithubAuthProvider,signOut,createUserWithEmailAndPassword,signInWithEmailAndPassword,sendEmailVerification,sendPasswordResetEmail,updateProfile} from 'firebase/auth';
 import { useState } from 'react';
 import './App.css';
 import initializeAuthentication from './firebase/firebase.init';
@@ -9,11 +9,13 @@ initializeAuthentication();
 const Googleprovider = new GoogleAuthProvider();
 const GithubProvider = new GithubAuthProvider();
 function App() {
+  const [name,SetName]=useState();
   const [email,setEmail]=useState('');
   const [password,setPassword]=useState('');
   
   const [user, setUser]= useState({});
-  const [error,setError]=useState()
+  const [error,setError]=useState();
+  const [isLOgin, setIsLogin]=useState(false)
   const auth =getAuth();
 const hendelGoogleSingIn = () =>{
   
@@ -52,6 +54,10 @@ setUser({})
 const ChangeEmail = e =>{
   setEmail(e.target.value);
 }
+
+const toggleChack= e=>{
+  setIsLogin(e.target.checked);
+}
 const hendelOnBlur= e =>{
   setPassword(e.target.value);
 }
@@ -68,38 +74,120 @@ const handelRagistration = e =>{
   //   setError('2 uper case must')
   //   return;
   // }
-  createUserWithEmailAndPassword(auth,email,password)
+
+
+  // tarnareoparetor
+  // isLOgin? : createNewUser(email,password)
+
+  // if else use 
+  
+
+  const prossesLogin=(email,password)=>{
+    signInWithEmailAndPassword(auth, email,password)
+    .then(result =>{
+      const user=result.user;
+      console.log(user);
+      setError('')
+    })
+    .catch(error=>{
+      setError(error.message)
+    })
+
+  }
+  
+  const createNewUser=(email,password)=>{
+    createUserWithEmailAndPassword(auth,email,password)
   .then(result=>{
     const user=result.user;
     
     console.log(user);
+    emailVarify();
     setError('')
+    setUserName();
+    
     
   })
   .catch(error =>{
     setError(error.message)
   })
- 
   
+  }
+
+  const setUserName =()=>{
+    updateProfile(auth.currentUser,{displayName: name})
+    .then(result=>{
+      console.log(result);
+    })
+  }
+  
+ 
+  if(isLOgin){
+    prossesLogin(email,password);
+  }
+  else{
+    createNewUser(email,password)
+
+  }
 
 }
 
-  return (
-    <div className="App" style={{backgroundColor:"lightblue"}}>
 
-      <form onSubmit={handelRagistration}>
-        <h2>Please Registration</h2>
-        <label htmlFor="email">Email : </label>
-        <input type="email" onChange={ChangeEmail} name="email" required/>
+const emailVarify =()=>{
+  sendEmailVerification(auth.currentUser)
+  .then( result=> {
+    console.log(result);
+    // Email verification sent!
+    // ...
+  });
+}
+ const handelResetPassword =()=>{
+  sendPasswordResetEmail(auth,email)
+  .then(result=>{
+    console.log(result);
+  })
+ }
+ const hndelName=e=>{
+   SetName(e.target.value)
+  
+ }
+//  video play link 
+//  <iframe width="420" height="345" src="https://www.youtube.com/embed/Io0WdUNVZPc">
+// </iframe>
+
+  return (
+    <div className="App">
+
+      <form  onSubmit={handelRagistration}>
+
+        <h2>Please {isLOgin ? 'Login': 'Register'} </h2>
         <br /><br />
-        <label htmlFor="passpord">Password : </label>
-        <input type="password" onBlur={hendelOnBlur} name="password" id="" required/>
+        {!isLOgin &&<div>
+        <div><label className="dd fs-4 text-light mb-2 " htmlFor="Name">Name</label></div>
+        <input className="dd fs-4 text-light mb-2 " type="text" onBlur={hndelName} name="name" placeholder="Your Neme" />
+        </div>}
+        <br /><br />
+        <label className="dd fs-4 text-light mb-2" htmlFor="email">Email</label>
+        <div><input className="dd fs-4 text-drak mb-2" type="email" onChange={ChangeEmail} name="email" required/></div>
+        <br /><br />
+        <label className="dd fs-4 text-light" htmlFor="passpord"> Password </label >
+         <div> <input className="dd fs-4 text-drak mb-2" type="password" onBlur={hendelOnBlur} name="password" id="" required/></div>
         <br /><br />
         <p >{error}</p>
-        <input type="submit" value="Ragistration" />
+        
+        <br /><br />
+        
+  <input className="form-check-input"  onChange={toggleChack} type="checkbox" value="" id="flexCheckIndeterminate"/>
+  <label className="form-check-label" htmlFor="flexCheckIndeterminate">
+   You are already loging
+  </label>
+  <br /><br /><br />
+  {/* <input type="submit" value="ation" /> */}
+  <button type="submit" className="btn-info w-25 p-2 fs-5">{isLOgin ? 'Login':'Ragistr'}</button> <button className="btn-info w-25 p-2 fs-5" onClick={handelResetPassword} type="reset">Reset Password</button>
+
       </form>
 
  <br /> <br /><br /><br />
+
        
     <div>.............................................</div>
       { !user.photo ?
@@ -118,6 +206,7 @@ const handelRagistration = e =>{
           <img src={user.photo} alt=""/>
         </div>
       }
+      
     </div>
   );
 }
